@@ -6,11 +6,12 @@ By Krystian Gadomski, [gadomski.dev](https://gadomski.dev)
 
 An [output style](https://code.claude.com/docs/en/output-styles) is a Markdown file of instructions that Claude Code sends with every request. It changes how the agent writes to you, not how it codes.
 
-```bash
-claude plugin marketplace add gadomski-dev/ai-gadomski.dev && claude plugin install g-dev@gadomski.dev
+```shell
+claude plugin marketplace add gadomski-dev/ai-gadomski.dev
+claude plugin install g-dev@gadomski.dev
 ```
 
-Then type `/output-style g-dev:ground-control` in a new session. Why the rules look the way they do: [docs/why.md](docs/why.md).
+The same two commands work on macOS, Linux and Windows. Then type `/output-style g-dev:ground-control` in a new session. Why the rules look the way they do: [docs/why.md](docs/why.md).
 
 ## Five problems, five sections
 
@@ -62,9 +63,13 @@ Both replies above are written for this README, not captured from a session.
 
 ## Install
 
+The `claude` and `git` commands below are the same on macOS, Linux and Windows. Only copying the file by hand differs, so that part has a block per system.
+
+On Windows, `~/.claude` in this README means `%USERPROFILE%\.claude`, for example `C:\Users\you\.claude`. Running Claude Code inside WSL, the Linux layer for Windows? Use the Linux commands inside WSL.
+
 ### As a plugin
 
-```bash
+```shell
 claude plugin marketplace add gadomski-dev/ai-gadomski.dev
 claude plugin install g-dev@gadomski.dev
 ```
@@ -73,14 +78,14 @@ Then start a new Claude Code session, or run `/reload-plugins` in one already op
 
 To update later:
 
-```bash
+```shell
 claude plugin marketplace update gadomski.dev
 claude plugin update g-dev@gadomski.dev
 ```
 
 ### Try it without installing
 
-```bash
+```shell
 git clone https://github.com/gadomski-dev/ai-gadomski.dev.git
 claude --plugin-dir ./ai-gadomski.dev
 ```
@@ -91,17 +96,36 @@ The plugin is loaded for that one session only.
 
 For every project on your machine:
 
+**macOS and Linux** (also Git Bash on Windows):
+
 ```bash
 git clone https://github.com/gadomski-dev/ai-gadomski.dev.git ~/ai-gadomski.dev
 mkdir -p ~/.claude/output-styles
 cp ~/ai-gadomski.dev/output-styles/ground-control.md ~/.claude/output-styles/
 ```
 
+**Windows** (PowerShell):
+
+```powershell
+git clone https://github.com/gadomski-dev/ai-gadomski.dev.git "$HOME\ai-gadomski.dev"
+New-Item -ItemType Directory -Force "$HOME\.claude\output-styles" | Out-Null
+Copy-Item "$HOME\ai-gadomski.dev\output-styles\ground-control.md" "$HOME\.claude\output-styles\"
+```
+
 For one project only, run the clone line above, then at the project root:
+
+**macOS and Linux** (also Git Bash on Windows):
 
 ```bash
 mkdir -p .claude/output-styles
 cp ~/ai-gadomski.dev/output-styles/ground-control.md .claude/output-styles/
+```
+
+**Windows** (PowerShell):
+
+```powershell
+New-Item -ItemType Directory -Force .claude\output-styles | Out-Null
+Copy-Item "$HOME\ai-gadomski.dev\output-styles\ground-control.md" .claude\output-styles\
 ```
 
 Claude Code reads style files at start, so restart it after copying.
@@ -115,7 +139,7 @@ Run `/config` and pick it under **Output style**, or type the command below. It 
 | Plugin | `/output-style g-dev:ground-control` | `"g-dev:ground-control"` |
 | Copied file | `/output-style ground-control` | `"ground-control"` |
 
-The command ignores case. The settings value does not: a value that does not match the name exactly gives you the Default style with no error. To use it in every project, set `outputStyle` in `~/.claude/settings.json`.
+The command ignores case. The settings value does not: a value that does not match the name exactly gives you the Default style with no error. To use it in every project, set `outputStyle` in `~/.claude/settings.json` (`%USERPROFILE%\.claude\settings.json` on Windows).
 
 ## Make it yours
 

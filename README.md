@@ -1,6 +1,9 @@
 # ai-gadomski.dev
 
-One Claude Code plugin, **g-dev**, with one output style: **ground-control**, which stops your agent writing like an alien genius in a basement.
+One Claude Code plugin, **g-dev**, with an output style and two skills:
+
+- **ground-control**, an output style that stops your agent writing like an alien genius in a basement.
+- **feynman**, **feynman-check** and **feynman-html**, three skills that apply the Feynman Technique to whatever your agent explains. See [Feynman skills](#feynman-skills).
 
 By Krystian Gadomski, [gadomski.dev](https://gadomski.dev)
 
@@ -61,6 +64,20 @@ The question: *"Can we merge the price cache branch?"*
 
 Both replies above are written for this README, not captured from a session.
 
+## Feynman skills
+
+Your agent explains a bug or an architecture, you read it, you nod, and you still could not explain it back. The Feynman Technique says you understand something only when you can explain it in plain words. These skills break a topic into pieces small enough for one simple sentence each, check your own explanation and show your gaps without handing you the answer, and draw the breakdown as a page.
+
+The core idea: **Me first. AI second. Then compare.**
+
+| Command | What it does | Example |
+|---|---|---|
+| `/g-dev:feynman <topic or ID>` | Splits a topic into 2 to 5 pieces with IDs such as `H1` and `H1.2`, each explained in one simple sentence. Pass an ID from an earlier breakdown to zoom into that piece only | `/g-dev:feynman what is an agent harness` |
+| `/g-dev:feynman-check <ID or topic> "<your explanation>"` | Marks each claim in your explanation as right, partly right or wrong, and lists what you missed, with hints instead of the answer | `/g-dev:feynman-check H1.2 "the model returns code that the harness runs"` |
+| `/g-dev:feynman-html <topic or ID>` | Does what `/g-dev:feynman` does, then draws the whole breakdown as an HTML page in the gadomski.dev colours: a clickable tree diagram and one table per zoom-in. Opens it in your browser, or reloads the tab when the page is already open (reloading needs macOS with Safari or Chrome). With no input, it redraws the page | `/g-dev:feynman-html what is an agent harness`, then `/g-dev:feynman-html H1` |
+
+The breakdown lives in the current session only, so in a new session `/g-dev:feynman H1` has no `H1` to find and asks you for the topic. The only file written is the page from `/g-dev:feynman-html`, in your system's temporary folder.
+
 ## Install
 
 The `claude` and `git` commands below are the same on macOS, Linux and Windows. Only copying the file by hand differs, so that part has a block per system.
@@ -74,7 +91,7 @@ claude plugin marketplace add gadomski-dev/ai-gadomski.dev
 claude plugin install g-dev@gadomski.dev
 ```
 
-Then start a new Claude Code session, or run `/reload-plugins` in one already open. Until then `/output-style` does not know the style. Check with `claude plugin list`, which lists `g-dev@gadomski.dev` as enabled.
+Then start a new Claude Code session, or run `/reload-plugins` in one already open. Until then `/output-style` does not know the style and the `/g-dev:` skills do not exist. Check with `claude plugin list`, which lists `g-dev@gadomski.dev` as enabled.
 
 To update later:
 
@@ -170,7 +187,7 @@ To edit it, copy the file into `~/.claude/output-styles/` and change it there. A
 
 ## Maintainers
 
-Raise `"version"` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) with every change under `output-styles/`. Claude Code caches an installed plugin by that string, so an unchanged version never reaches users who already installed it. The `Plugin version` check ([`scripts/check-version-bump.sh`](scripts/check-version-bump.sh)) fails a pull request that forgets. Tag each release with `claude plugin tag --push`.
+Raise `"version"` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) with every change under `output-styles/` or `skills/`. Claude Code caches an installed plugin by that string, so an unchanged version never reaches users who already installed it. The `Plugin version` check ([`scripts/check-version-bump.sh`](scripts/check-version-bump.sh)) fails a pull request that forgets. Tag each release with `claude plugin tag --push`.
 
 `universal/AGENTS.md` is generated from the style file, so change the style first and regenerate, never the other way round. Regenerate from the repository root, then commit both files:
 

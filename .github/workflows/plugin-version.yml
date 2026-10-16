@@ -1,0 +1,30 @@
+name: Plugin version
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  version-bump:
+    name: Styles or skills changed, version raised
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fail when output-styles/ or skills/ change without a new plugin version
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            base="$(git merge-base "origin/${BASE_REF}" HEAD)"
+          else
+            base="$BEFORE"
+          fi
+          scripts/check-version-bump.sh "$base"

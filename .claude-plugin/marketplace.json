@@ -1,0 +1,15 @@
+{
+  "name": "gadomski.dev",
+  "description": "An output style from gadomski.dev: readable agent replies when you run several agents at once.",
+  "owner": {
+    "name": "Krystian Gadomski",
+    "url": "https://gadomski.dev"
+  },
+  "plugins": [
+    {
+      "name": "g-dev",
+      "source": "./",
+      "description": "The ground-control output style: every reply ends with a WHERE WE STAND table, so you can tell several running agents apart and catch up on any of them."
+    }
+  ]
+}

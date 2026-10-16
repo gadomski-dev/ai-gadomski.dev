@@ -148,7 +148,11 @@ To edit it, copy the file into `~/.claude/output-styles/` and change it there. A
 
 Raise `"version"` in [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json) with every change under `output-styles/`. Claude Code caches an installed plugin by that string, so an unchanged version never reaches users who already installed it. The `Plugin version` check ([`scripts/check-version-bump.sh`](scripts/check-version-bump.sh)) fails a pull request that forgets. Tag each release with `claude plugin tag --push`.
 
-`universal/AGENTS.md` is generated from the style file, so change the style first and regenerate, never the other way round.
+`universal/AGENTS.md` is generated from the style file, so change the style first and regenerate, never the other way round. Regenerate from the repository root, then commit both files:
+
+```bash
+python3 scripts/build-universal.py
+```
 
 ## License
 

@@ -1,7 +1,7 @@
 {
   "name": "g-dev",
-  "description": "The ground-control output style for Claude Code. ground-control ends every reply with a WHERE WE STAND table, so returning to any agent session after hours costs no scrolling.",
-  "version": "1.0.1",
+  "description": "The ground-control output style and three Feynman Technique skills for Claude Code. ground-control ends every reply with a WHERE WE STAND table. /g-dev:feynman breaks a topic into small pieces with stable IDs, /g-dev:feynman-check checks your own explanation without giving you the answer, and /g-dev:feynman-html does the same breakdown and draws it as a branded HTML page.",
+  "version": "1.1.0",
   "author": {
     "name": "Krystian Gadomski",
     "url": "https://gadomski.dev"
@@ -13,6 +13,7 @@
     "readability",
     "multi-agent",
     "communication",
+    "feynman-technique",
     "claude-code"
   ]
 }

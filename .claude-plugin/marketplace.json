@@ -1,6 +1,6 @@
 {
   "name": "gadomski.dev",
-  "description": "An output style from gadomski.dev: readable agent replies when you run several agents at once.",
+  "description": "An output style and skills from gadomski.dev: readable agent replies when you run several agents at once, and the Feynman Technique for understanding what your agent tells you.",
   "owner": {
     "name": "Krystian Gadomski",
     "url": "https://gadomski.dev"
@@ -9,7 +9,7 @@
     {
       "name": "g-dev",
       "source": "./",
-      "description": "The ground-control output style: every reply ends with a WHERE WE STAND table, so you can tell several running agents apart and catch up on any of them."
+      "description": "The ground-control output style, plus /g-dev:feynman, /g-dev:feynman-check and /g-dev:feynman-html: break a topic into small pieces with stable IDs, check your own explanation of it, and see the breakdown as a page."
     }
   ]
 }

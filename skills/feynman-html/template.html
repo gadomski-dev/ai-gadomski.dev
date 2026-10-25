@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feynman breakdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=League+Spartan:wght@700&display=swap">
+<style>
+/* Colours, type and roles from the gadomski.dev brand book (tokens/colors.css, brandbook.css).
+   Studio White edition by default, Studio Graphite when the system is in dark mode. */
+:root {
+  --signal: #FF5C18;
+  --bg: #FFFFFF; --bg-2: #FAFAF8; --panel: #F1F1EE;
+  --line: rgba(16,16,16,.12); --line-2: rgba(16,16,16,.24);
+  --fg: #101010; --fg-2: #5A5A5A; --accent-text: #C2410C;
+  --atom: #0B7F45;
+  --note: #EFE8DE;
+  --display: "League Spartan", "Montserrat", system-ui, sans-serif;
+  --text-font: "Geist", "Inter", system-ui, sans-serif;
+  --mono: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
+  --calm-out: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #2B2F35; --bg-2: #262A2F; --panel: #343940;
+    --line: rgba(255,255,255,.12); --line-2: rgba(255,255,255,.26);
+    --fg: #FFFFFF; --fg-2: #9AA0A8; --accent-text: #FF8A5B;
+    --atom: #3BDB8A;
+    --note: #343940;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 17px/28px var(--text-font); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration-color: var(--line-2); text-underline-offset: 3px; }
+/* Full window width. Paragraphs keep their own max-width, so lines stay readable. */
+.wrap { padding: 56px 48px 80px; }
+
+.label { font: 500 12px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--fg-2); }
+.label b { color: var(--fg); font-weight: 500; }
+.sq { display: inline-block; width: 8px; height: 8px; vertical-align: 1px; margin-right: 8px; background: var(--fg); }
+.sq.signal { background: var(--signal); }
+.sq.atom { background: var(--atom); }
+.sq.split { background: transparent; box-shadow: inset 0 0 0 1.5px var(--fg); }
+.sq.open { background: transparent; box-shadow: inset 0 0 0 1.5px var(--fg-2); }
+
+h1 { font: 700 55px/0.95 var(--display); letter-spacing: -0.035em; margin: 18px 0 0; max-width: 20ch; }
+.lead { font-size: 21px; line-height: 32px; color: var(--fg); max-width: 62ch; margin: 20px 0 0; }
+
+/* Diagram: the agent layer of the brand book. Dot grid at 22 px, registration marks,
+   hairlines at 90 degrees with square ends, one signal for the piece in focus. */
+.board { position: relative; margin: 48px 0 12px; background: var(--bg-2); overflow-x: auto; }
+.board .dots { position: absolute; inset: 0; background-image: radial-gradient(var(--line-2) 1.1px, transparent 1.6px); background-size: 22px 22px; opacity: .55; pointer-events: none; }
+.reg { position: absolute; width: 21px; height: 21px; pointer-events: none; }
+.reg::before, .reg::after { content: ""; position: absolute; background: var(--line-2); }
+.reg::before { left: 10px; top: 0; width: 1px; height: 21px; }
+.reg::after { top: 10px; left: 0; height: 1px; width: 21px; }
+.reg.tl { top: 8px; left: 8px; } .reg.tr { top: 8px; right: 8px; }
+.reg.bl { bottom: 8px; left: 8px; } .reg.br { bottom: 8px; right: 8px; }
+.canvas { position: relative; margin: 0 auto; }
+.canvas svg { position: absolute; inset: 0; overflow: visible; }
+.wire { fill: none; stroke: var(--fg-2); stroke-width: 1.5; stroke-linecap: square; opacity: .7; }
+.wire.hot { stroke: var(--signal); opacity: 1; }
+.node { position: absolute; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 0 14px;
+  background: var(--bg); border: 1.5px solid var(--line-2); text-decoration: none; color: var(--fg);
+  transition: transform 320ms var(--calm-out), border-color 320ms var(--calm-out); }
+.node:hover { transform: translateY(-2px); border-color: var(--fg-2); }
+.node .nid { font: 500 11.5px/1.2 var(--mono); letter-spacing: .1em; color: var(--fg-2); }
+.node .nname { font: 500 15px/1.3 var(--text-font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.node.split { border-color: var(--fg); }
+.node.atom { border-color: var(--atom); }
+.node.atom .nid::before { content: ""; display: inline-block; width: 7px; height: 7px; background: var(--atom); margin-right: 7px; vertical-align: 0; }
+.node.focus { border-color: var(--signal); border-width: 2px; }
+.node.focus::after { content: ""; position: absolute; top: -5px; right: -5px; width: 9px; height: 9px; background: var(--signal); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 0 0 8px; }
+
+/* Breakdowns */
+.bd { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--line-2); scroll-margin-top: 24px; }
+.bd h2 { font: 700 34px/1.05 var(--display); letter-spacing: -0.02em; margin: 14px 0 0; }
+.bd h2 .hid { font: 500 0.6em/1 var(--mono); letter-spacing: .04em; color: var(--fg-2); margin-right: 14px; vertical-align: 0.2em; }
+.bd .lead { font-size: 19px; line-height: 30px; margin-top: 14px; }
+
+table.t { width: 100%; border-collapse: collapse; font-size: 16px; line-height: 25px; margin-top: 28px; }
+table.t th { text-align: left; font: 500 11.5px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--fg-2);
+  padding: 0 20px 12px 0; border-bottom: 1px solid var(--line-2); vertical-align: bottom; }
+table.t td { padding: 14px 20px 14px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.t td.id { font: 500 14px/25px var(--mono); white-space: nowrap; width: 1%; }
+table.t td.piece { font-weight: 500; width: 24%; }
+table.t td.where { font: 400 13px/25px var(--mono); color: var(--fg-2); word-break: break-word; width: 24%; }
+table.t tr { scroll-margin-top: 24px; }
+table.t tr:target td { background: var(--panel); }
+table.t tr.focus td { background: linear-gradient(90deg, rgba(255,92,24,.08), transparent 70%); }
+table.t tr.focus td:first-child { box-shadow: inset 3px 0 0 var(--signal); padding-left: 14px; }
+table.t td .tag { font: 500 10.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--atom); margin-left: 10px; white-space: nowrap; }
+
+.note { background: var(--note); padding: 18px 22px; margin-top: 24px; }
+.note ul { margin: 8px 0 0; padding: 0; list-style: none; }
+.note li { margin: 6px 0 0; }
+.note li b { font: 500 14px/1 var(--mono); margin-right: 10px; }
+.next { margin-top: 20px; }
+.next .label { margin-right: 12px; }
+.next a { color: var(--accent-text); }
+
+.foot { margin-top: 96px; padding-top: 20px; border-top: 1px solid var(--line); }
+.foot a { color: var(--accent-text); text-decoration: none; }
+.foot a:hover { text-decoration: underline; }
+.error { font: 500 15px/1.6 var(--mono); color: var(--accent-text); white-space: pre-wrap; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .node { transition: none; } }
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+
+<script type="application/json" id="feynman-data">
+__FEYNMAN_DATA__
+</script>
+<script>
+(function () {
+  "use strict";
+  var app = document.getElementById("app");
+  var NODE_W = 216, NODE_H = 56, GAP_X = 60, GAP_Y = 12, PAD = 44;
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function fail(msg) {
+    app.textContent = "";
+    app.appendChild(el("p", "label", "g-dev · feynman-html"));
+    app.appendChild(el("p", "error", msg));
+  }
+
+  var data;
+  try { data = JSON.parse(document.getElementById("feynman-data").textContent); }
+  catch (e) { fail("The breakdown data could not be read.\n" + e.message); return; }
+  if (!data || !Array.isArray(data.nodes) || !data.nodes.length) { fail("The breakdown data has no nodes."); return; }
+
+  // IDs: root is letters only (H); children add a number (H1), deeper levels add .N (H1.2).
+  function parentOf(id) {
+    if (id.indexOf(".") >= 0) return id.slice(0, id.lastIndexOf("."));
+    var m = /^([A-Za-z]+)\d+$/.exec(id);
+    return m ? m[1] : null;
+  }
+  function lastNum(id) {
+    var m = /(\d+)$/.exec(id);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
+  var byId = {};
+  data.nodes.forEach(function (n) { if (n && n.id) { n.id = String(n.id); n.kids = []; byId[n.id] = n; } });
+  var root = null;
+  data.nodes.forEach(function (n) {
+    if (!n || !n.id || byId[n.id] !== n) return;
+    var p = parentOf(n.id);
+    if (p && byId[p]) byId[p].kids.push(n);
+    else if (!root) root = n;
+  });
+  if (!root) { fail("The breakdown data has no root node."); return; }
+  Object.keys(byId).forEach(function (k) { byId[k].kids.sort(function (a, b) { return lastNum(a.id) - lastNum(b.id); }); });
+
+  var focus = byId[data.focus] || root;
+  var hotPath = {};
+  for (var f = focus; f; f = byId[parentOf(f.id)]) hotPath[f.id] = true;
+
+  function crumbs(n) {
+    var ids = [];
+    for (var c = n; c; c = byId[parentOf(c.id)]) ids.unshift(c.id);
+    return ids.join(" > ");
+  }
+
+  // An atom that was split anyway counts as broken down, not as an atom.
+  function isAtom(n) { return !!n.atom && !n.kids.length; }
+
+  // Layout: left to right, leaves stacked top to bottom, each parent centred on its children.
+  var slot = 0, maxDepth = 0, total = 0, atoms = 0;
+  (function place(n, depth) {
+    n.depth = depth;
+    maxDepth = Math.max(maxDepth, depth);
+    if (n !== root) { total++; if (isAtom(n)) atoms++; }
+    if (!n.kids.length) { n.y = slot++ * (NODE_H + GAP_Y); }
+    else {
+      n.kids.forEach(function (k) { place(k, depth + 1); });
+      n.y = (n.kids[0].y + n.kids[n.kids.length - 1].y) / 2;
+    }
+    n.x = depth * (NODE_W + GAP_X);
+  })(root, 0);
+
+  // ---- header
+  var title = String(data.title || root.name || root.id);
+  title = title.charAt(0).toUpperCase() + title.slice(1);
+  document.title = "Feynman · " + title;
+  var updated = new Date(document.lastModified);
+  var hh = ("0" + updated.getHours()).slice(-2), mm = ("0" + updated.getMinutes()).slice(-2);
+
+  var top = el("header");
+  var eyebrow = el("p", "label");
+  eyebrow.appendChild(el("span", "sq"));
+  eyebrow.appendChild(document.createTextNode("g-dev · feynman · "));
+  eyebrow.appendChild(el("b", null, root.id));
+  eyebrow.appendChild(document.createTextNode(" · " + total + (total === 1 ? " piece" : " pieces") + " · " + atoms + (atoms === 1 ? " atom" : " atoms") + " · updated " + hh + ":" + mm));
+  top.appendChild(eyebrow);
+  top.appendChild(el("h1", null, title));
+  if (root.sentence) top.appendChild(el("p", "lead", root.sentence));
+  app.appendChild(top);
+
+  // ---- diagram
+  var board = el("section", "board");
+  board.appendChild(el("div", "dots"));
+  ["tl", "tr", "bl", "br"].forEach(function (c) { board.appendChild(el("span", "reg " + c)); });
+  var w = (maxDepth + 1) * (NODE_W + GAP_X) - GAP_X + PAD * 2;
+  var h = slot * (NODE_H + GAP_Y) - GAP_Y + PAD * 2;
+  var canvas = el("div", "canvas");
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+  var SVG = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("width", w);
+  svg.setAttribute("height", h);
+  canvas.appendChild(svg);
+
+  function wire(d, hot) {
+    var p = document.createElementNS(SVG, "path");
+    p.setAttribute("d", d);
+    p.setAttribute("class", hot ? "wire hot" : "wire");
+    svg.appendChild(p);
+  }
+  Object.keys(byId).forEach(function (k) {
+    var n = byId[k];
+    if (!n.kids.length || n.depth == null) return;
+    var px = PAD + n.x + NODE_W, py = PAD + n.y + NODE_H / 2, mx = px + GAP_X / 2;
+    var first = PAD + n.kids[0].y + NODE_H / 2, last = PAD + n.kids[n.kids.length - 1].y + NODE_H / 2;
+    wire("M" + px + " " + py + "H" + mx + "M" + mx + " " + first + "V" + last, false);
+    n.kids.forEach(function (c) {
+      var cy = PAD + c.y + NODE_H / 2;
+      wire("M" + mx + " " + cy + "H" + (PAD + c.x), false);
+    });
+    var hotKid = n.kids.filter(function (c) { return hotPath[c.id]; })[0];
+    if (hotKid && hotPath[n.id]) {
+      var hy = PAD + hotKid.y + NODE_H / 2;
+      wire("M" + px + " " + py + "H" + mx + "V" + hy + "H" + (PAD + hotKid.x), true);
+    }
+  });
+
+  Object.keys(byId).forEach(function (k) {
+    var n = byId[k];
+    if (n.depth == null) return;
+    var a = el("a", "node");
+    if (n.kids.length) a.className += " split";
+    if (isAtom(n)) a.className += " atom";
+    if (n === focus) a.className += " focus";
+    a.style.left = (PAD + n.x) + "px";
+    a.style.top = (PAD + n.y) + "px";
+    a.style.width = NODE_W + "px";
+    a.style.height = NODE_H + "px";
+    a.href = n.kids.length ? "#sec-" + n.id : "#row-" + n.id;
+    a.title = n.explanation ? n.name + ": " + n.explanation : (n.name || n.id);
+    a.appendChild(el("span", "nid", n.id));
+    a.appendChild(el("span", "nname", n.name || ""));
+    canvas.appendChild(a);
+  });
+  board.appendChild(canvas);
+  app.appendChild(board);
+
+  var legend = el("div", "legend");
+  [["sq signal", "in focus"], ["sq split", "broken down"], ["sq open", "still to split"], ["sq atom", "atom: one simple sentence"]].forEach(function (it) {
+    var s = el("span", "label");
+    s.appendChild(el("span", it[0]));
+    s.appendChild(document.createTextNode(it[1]));
+    legend.appendChild(s);
+  });
+  app.appendChild(legend);
+
+  // ---- one section per node that was broken down, root first, depth first
+  (function sections(n) {
+    if (!n.kids.length) return;
+    var sec = el("section", "bd");
+    sec.id = "sec-" + n.id;
+    if (n !== root) sec.appendChild(el("p", "label", crumbs(n)));
+    var h2 = el("h2");
+    h2.appendChild(el("span", "hid", n.id));
+    h2.appendChild(document.createTextNode(n.name || ""));
+    sec.appendChild(h2);
+    if (n !== root && n.sentence) sec.appendChild(el("p", "lead", n.sentence));
+
+    var hasWhere = n.kids.some(function (c) { return c.where; });
+    var table = el("table", "t");
+    var head = el("tr");
+    ["ID", "Piece", "Simple explanation"].concat(hasWhere ? ["Where"] : []).forEach(function (t) { head.appendChild(el("th", null, t)); });
+    var thead = el("thead"); thead.appendChild(head); table.appendChild(thead);
+    var tbody = el("tbody");
+    n.kids.forEach(function (c) {
+      var tr = el("tr");
+      tr.id = "row-" + c.id;
+      if (c === focus) tr.className = "focus";
+      var idCell = el("td", "id");
+      if (c.kids.length) { var link = el("a", null, c.id); link.href = "#sec-" + c.id; idCell.appendChild(link); }
+      else idCell.textContent = c.id;
+      tr.appendChild(idCell);
+      var piece = el("td", "piece", c.name || "");
+      if (isAtom(c)) piece.appendChild(el("span", "tag", "atom"));
+      tr.appendChild(piece);
+      tr.appendChild(el("td", null, c.explanation || ""));
+      if (hasWhere) tr.appendChild(el("td", "where", c.where || ""));
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    sec.appendChild(table);
+
+    var simplified = n.kids.filter(function (c) { return c.simplified; });
+    if (simplified.length) {
+      var note = el("div", "note");
+      note.appendChild(el("p", "label", "Simplified: what the simple version leaves out"));
+      var ul = el("ul");
+      simplified.forEach(function (c) {
+        var li = el("li");
+        li.appendChild(el("b", null, c.id));
+        li.appendChild(document.createTextNode(c.simplified));
+        ul.appendChild(li);
+      });
+      note.appendChild(ul);
+      sec.appendChild(note);
+    }
+    if (n.next) {
+      var next = el("p", "next");
+      next.appendChild(el("span", "label", "Next"));
+      var m = /^([A-Za-z]+\d+(?:\.\d+)*)/.exec(n.next);
+      if (m && byId[m[1]]) {
+        var a = el("a", null, m[1]);
+        a.href = byId[m[1]].kids.length ? "#sec-" + m[1] : "#row-" + m[1];
+        next.appendChild(a);
+        next.appendChild(document.createTextNode(n.next.slice(m[1].length)));
+      } else next.appendChild(document.createTextNode(n.next));
+      sec.appendChild(next);
+    }
+    app.appendChild(sec);
+    n.kids.forEach(sections);
+  })(root);
+
+  var foot = el("p", "label foot", "Generated by /g-dev:feynman-html from this Claude Code session. Run /g-dev:feynman-html <ID> to split a piece and update this page. Made with g-dev by ");
+  var site = el("a", null, "gadomski.dev");
+  site.href = "https://gadomski.dev";
+  site.target = "_blank";
+  site.rel = "noopener";
+  foot.appendChild(site);
+  app.appendChild(foot);
+})();
+</script>
+</body>
+</html>

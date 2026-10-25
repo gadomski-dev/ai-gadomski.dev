@@ -160,13 +160,13 @@ To edit it, copy the file into `~/.claude/output-styles/` and change it there. A
 | Codex, Cursor and other tools that read `AGENTS.md` | `AGENTS.md` at the repository root |
 | Claude Code without the plugin | `CLAUDE.md` in the project, or `~/.claude/CLAUDE.md` for every project |
 | GitHub Copilot | `.github/copilot-instructions.md` |
-| ChatGPT | Does not fit whole. The block runs about 14,000 characters, and section 5 alone about 5,500. Custom instructions were reported in July 2026 to hold 5,000 characters on paid plans and 1,500 on the free plan. On a paid plan, **Who is reading** (about 1,300) plus one or two of sections 1 to 4 fits. Check the limit ChatGPT shows you before pasting |
+| ChatGPT | Does not fit whole. The block runs about 14,500 characters, and section 5 alone about 4,600. Custom instructions were reported in July 2026 to hold 5,000 characters on paid plans and 1,500 on the free plan. On a paid plan, **Who is reading** (about 1,100) plus one or two of sections 1 to 4 fits. Check the limit ChatGPT shows you before pasting |
 
 ## Limits
 
 - **An output style is an instruction, not a guarantee.** Built-in styles get a short reminder of their rules on every turn. A custom style gets only "Remember to follow the specific guidelines for this style" (checked in Claude Code 2.1.287), so in a long session the rules can fade. When the `WHERE WE STAND` table stops appearing, ask the agent to follow its output style, or start a new session.
 - **Subagents do not see output styles, except forks.** The style shapes the main conversation and any fork of it, a subagent that copies the whole conversation. Other subagents run their own instructions, so their reports come back unstyled.
-- **It costs input tokens.** The file is about 13,900 characters, roughly 3,500 tokens by the 4-characters-per-token rule of thumb, sent with every request. Prompt caching cuts that cost after the first request in a session.
+- **It costs input tokens.** The file is about 14,300 characters, roughly 3,600 tokens by the 4-characters-per-token rule of thumb, sent with every request. Prompt caching cuts that cost after the first request in a session.
 
 ## Maintainers
 

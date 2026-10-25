@@ -1,6 +1,6 @@
 # ai-gadomski.dev
 
-One Claude Code plugin, **g-dev**, with an output style and two skills:
+One Claude Code plugin, **g-dev**, with one output style and three skills:
 
 - **ground-control**, an output style that stops your agent writing like an alien genius in a basement.
 - **feynman**, **feynman-check** and **feynman-html**, three skills that apply the Feynman Technique to whatever your agent explains. See [Feynman skills](#feynman-skills).

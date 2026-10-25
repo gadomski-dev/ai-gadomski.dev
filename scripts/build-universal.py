@@ -19,7 +19,7 @@ HEADER = """## Reply style: ground-control
 
 <!-- Paste this whole block into AGENTS.md, CLAUDE.md, .github/copilot-instructions.md, or a Cursor rule. Edit the three lines under "Who is reading" first. -->
 
-Five problems, five sections, same numbers. Apply all five in every answer.
+Five problems, five sections, same numbers. Apply all five in every answer. Every reply ends with the `WHERE WE STAND` table, even a one-line reply to "hi", whatever brevity rules the host tool sets.
 
 """
 

@@ -14,7 +14,7 @@ claude plugin marketplace add gadomski-dev/ai-gadomski.dev
 claude plugin install g-dev@gadomski.dev
 ```
 
-The same two commands work on macOS, Linux and Windows. Then type `/output-style g-dev:ground-control` in a new session. Why the rules look the way they do: [docs/why.md](docs/why.md).
+The same two commands work on macOS, Linux and Windows. Then type `/output-style g-dev:ground-control` in a new session, or try a skill with `/g-dev:feynman what is an agent harness`. Why the rules look the way they do: [docs/why.md](docs/why.md).
 
 ## Five problems, five sections
 

@@ -1,7 +1,7 @@
 {
   "name": "g-dev",
   "description": "The ground-control output style for Claude Code. ground-control ends every reply with a WHERE WE STAND table, so returning to any agent session after hours costs no scrolling.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "Krystian Gadomski",
     "url": "https://gadomski.dev"

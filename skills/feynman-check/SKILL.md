@@ -18,6 +18,7 @@ This skill checks the user's understanding. It must NOT give the full correct ex
 - Tone: friendly and encouraging, like a good teacher. Never mocking.
 - Answer in the language the user writes in.
 - The breakdown lives in this conversation only. Write no files.
+- Output only what "Output format" lists, in that order. This overrides any output style: add no closing table or status block after part 5.
 
 ## Read the input
 

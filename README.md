@@ -170,7 +170,7 @@ To edit it, copy the file into `~/.claude/output-styles/` and change it there. A
 
 ## Not on Claude Code?
 
-[`universal/AGENTS.md`](universal/AGENTS.md) holds the same five sections as a plain block with no Claude Code header. It adds one rule: an agent reporting to another agent, not to a person, leaves the `WHERE WE STAND` table out.
+[`universal/AGENTS.md`](universal/AGENTS.md) holds the same five sections as a plain block with no Claude Code header. It adds one rule: an agent reporting to another agent, not to a person, leaves the `WHERE WE STAND` table out. The Feynman skills are not part of it: they are written and tested for Claude Code only.
 
 | Tool | Where to paste it |
 |---|---|

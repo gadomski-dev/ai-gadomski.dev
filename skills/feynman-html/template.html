@@ -111,7 +111,35 @@ table.t td .tag { font: 500 10.5px/1 var(--mono); letter-spacing: .12em; text-tr
 .foot a:hover { text-decoration: underline; }
 .error { font: 500 15px/1.6 var(--mono); color: var(--accent-text); white-space: pre-wrap; }
 
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .node { transition: none; } }
+/* Popup: the same explanation as the table row, opened from a diagram node or a table row. */
+table.t tbody tr { cursor: pointer; }
+table.t tbody tr:hover td { background: var(--bg-2); }
+dialog.pop { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 64px); padding: 0; border: 1.5px solid var(--line-2);
+  background: var(--bg); color: var(--fg); box-shadow: 0 24px 64px rgba(0,0,0,.18); }
+dialog.pop::backdrop { background: rgba(16,16,16,.32); }
+dialog.pop[open] { animation: pop-in 320ms var(--calm-out); }
+@keyframes pop-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.pop .inner { position: relative; padding: 28px 30px 26px; }
+.pop .close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border: 1px solid var(--line-2); background: transparent;
+  color: var(--fg); font: 400 20px/1 var(--text-font); cursor: pointer; }
+.pop .close:hover { border-color: var(--fg-2); }
+.pop.focus .inner { box-shadow: inset 3px 0 0 var(--signal); }
+.pop h3 { font: 700 28px/1.05 var(--display); letter-spacing: -0.02em; margin: 12px 40px 0 0; }
+.pop h3 .hid { font: 500 0.6em/1 var(--mono); letter-spacing: .04em; color: var(--fg-2); margin-right: 12px; vertical-align: 0.2em; }
+.pop .tag { font: 500 10.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--atom); margin-left: 10px; vertical-align: 0.4em; }
+.pop .expl { margin: 16px 0 0; }
+.pop .where { font: 400 13px/22px var(--mono); color: var(--fg-2); word-break: break-word; margin: 12px 0 0; }
+.pop .note { margin-top: 18px; padding: 14px 18px; }
+.pop .note p:last-child { margin: 6px 0 0; }
+.pop .sub { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+.pop .sub p { margin: 8px 0 0; }
+.pop .nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.pop .nav button, .pop .nav a { font: 500 13px/1.2 var(--mono); padding: 8px 12px; border: 1px solid var(--line-2); background: var(--bg-2);
+  color: var(--fg); cursor: pointer; text-decoration: none; }
+.pop .nav button:hover, .pop .nav a:hover { border-color: var(--fg-2); }
+.pop .nav a { color: var(--accent-text); }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .node { transition: none; } dialog.pop[open] { animation: none; } }
 </style>
 </head>
 <body>
@@ -264,6 +292,7 @@ __FEYNMAN_DATA__
     a.title = n.explanation ? n.name + ": " + n.explanation : (n.name || n.id);
     a.appendChild(el("span", "nid", n.id));
     a.appendChild(el("span", "nname", n.name || ""));
+    a.addEventListener("click", function (e) { e.preventDefault(); openPop(n); });
     canvas.appendChild(a);
   });
   board.appendChild(canvas);
@@ -309,6 +338,8 @@ __FEYNMAN_DATA__
       tr.appendChild(piece);
       tr.appendChild(el("td", null, c.explanation || ""));
       if (hasWhere) tr.appendChild(el("td", "where", c.where || ""));
+      // The ID link still jumps to the zoom-in; a click anywhere else on the row opens the popup.
+      tr.addEventListener("click", function (e) { if (!e.target.closest("a")) openPop(c); });
       tbody.appendChild(tr);
     });
     table.appendChild(tbody);
@@ -343,6 +374,67 @@ __FEYNMAN_DATA__
     app.appendChild(sec);
     n.kids.forEach(sections);
   })(root);
+
+  // ---- popup: one explanation at a time, with links to its parent and children
+  var pop = el("dialog", "pop");
+  pop.addEventListener("click", function (e) { if (e.target === pop) pop.close(); });
+  document.body.appendChild(pop);
+
+  function jump(n) {
+    var nav = el("button", null, n.id + "  " + (n.name || ""));
+    nav.type = "button";
+    nav.addEventListener("click", function () { openPop(n); });
+    return nav;
+  }
+  function openPop(n) {
+    pop.textContent = "";
+    pop.className = n === focus ? "pop focus" : "pop";
+    var inner = el("div", "inner");
+    var close = el("button", "close", "×");
+    close.type = "button";
+    close.setAttribute("aria-label", "Close");
+    close.addEventListener("click", function () { pop.close(); });
+    inner.appendChild(close);
+    inner.appendChild(el("p", "label", crumbs(n)));
+    var h3 = el("h3");
+    h3.appendChild(el("span", "hid", n.id));
+    h3.appendChild(document.createTextNode(n.name || ""));
+    if (isAtom(n)) h3.appendChild(el("span", "tag", "atom"));
+    inner.appendChild(h3);
+    if (n.explanation) inner.appendChild(el("p", "expl", n.explanation));
+    else if (n.sentence) inner.appendChild(el("p", "expl", n.sentence));
+    if (n.where) inner.appendChild(el("p", "where", n.where));
+    if (n.simplified) {
+      var note = el("div", "note");
+      note.appendChild(el("p", "label", "Simplified: what the simple version leaves out"));
+      note.appendChild(el("p", null, n.simplified));
+      inner.appendChild(note);
+    }
+    if (n.kids.length) {
+      var sub = el("div", "sub");
+      sub.appendChild(el("p", "label", "Broken down into " + n.kids.length + (n.kids.length === 1 ? " piece" : " pieces")));
+      if (n.explanation && n.sentence) sub.appendChild(el("p", null, n.sentence));
+      if (n.next) sub.appendChild(el("p", null, "Next: " + n.next));
+      var kids = el("div", "nav");
+      n.kids.forEach(function (k) { kids.appendChild(jump(k)); });
+      sub.appendChild(kids);
+      inner.appendChild(sub);
+    }
+    var nav = el("div", "nav");
+    var parent = byId[parentOf(n.id)];
+    if (parent) nav.appendChild(jump(parent));
+    var show = el("a", null, n.kids.length ? "Show its breakdown" : "Show in table");
+    show.href = n.kids.length ? "#sec-" + n.id : "#row-" + n.id;
+    show.addEventListener("click", function () { pop.close(); });
+    nav.appendChild(show);
+    var navWrap = el("div", "sub");
+    navWrap.appendChild(el("p", "label", parent ? "Up or elsewhere" : "On this page"));
+    navWrap.appendChild(nav);
+    inner.appendChild(navWrap);
+    pop.appendChild(inner);
+    if (!pop.open) pop.showModal();
+    close.focus();
+  }
 
   var foot = el("p", "label foot", "Generated by /g-dev:feynman-html from this Claude Code session. Run /g-dev:feynman-html <ID> to split a piece and update this page. Made with g-dev by ");
   var site = el("a", null, "gadomski.dev");

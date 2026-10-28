@@ -1,5 +1,5 @@
 ---
-description: Feynman Technique page. Does what /g-dev:feynman does, then draws the whole breakdown as a gadomski.dev-branded HTML page, with a clickable tree diagram and one table per zoom-in, and opens it in the browser, or reloads the tab if the page is already open.
+description: Feynman Technique page. Does what /g-dev:feynman does, then draws the whole breakdown as a gadomski.dev-branded HTML page, with a clickable tree diagram, one table per zoom-in and a popup with the explanation for every piece, and opens it in the browser, or reloads the tab if the page is already open.
 argument-hint: "[topic | ID]"
 disable-model-invocation: true
 allowed-tools: Read Grep Glob Bash(bash ${CLAUDE_SKILL_DIR}/scripts/render.sh *)
